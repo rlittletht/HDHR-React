@@ -1,1 +1,1 @@
-# Theta-HDTools
+# HDHR-React
