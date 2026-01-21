@@ -9,13 +9,14 @@ import { Episode } from "./Episode";
 import { CommonItems } from "./CommonItems";
 import { Series } from "./SeriesInfo";
 
-export interface DirectoryItemLineState
+export interface DirectoryItemDetailsState
 {
 }
 
-export interface DirectoryItemLineProps
+export interface DirectoryItemDetailsProps
 {
     item: DirectoryItemBase;
+    styles: Record<string, string>;
 }
 
 const useStyles = makeStyles(
@@ -26,19 +27,17 @@ const useStyles = makeStyles(
             flexDirection: 'row',
             columnGap: '15px',
             alignItems: 'flex-end',
-
-            background: hdhrBlueThemeLight.colorNeutralBackground3,
         },
         item:
             {}
     });
 
-export class DirectoryItemLineWithoutStyles extends React.Component<DirectoryItemLineProps, DirectoryItemLineState>
+export class DirectoryItemDetailsWithoutStyles extends React.Component<DirectoryItemDetailsProps, DirectoryItemDetailsState>
 {
     context!: IAppContext;
     static contextType = TheAppContext;
 
-    constructor(props: DirectoryItemLineProps)
+    constructor(props: DirectoryItemDetailsProps)
     {
         super(props);
 
@@ -67,12 +66,11 @@ export class DirectoryItemLineWithoutStyles extends React.Component<DirectoryIte
                          : (<Series item={getSeries(this.props.item)}/>);
 
         return (
-            <div className={this.props.styles.outerContainer}>
-                <CommonItems item={this.props.item}/>
+            <div>
                 {item}
             </div>
         );
     }
 };
 
-export const DirectoryItemLine = withStyles(useStyles, DirectoryItemLineWithoutStyles);
+export const DirectoryItemDetails = withStyles(useStyles, DirectoryItemDetailsWithoutStyles);

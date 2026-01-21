@@ -42,7 +42,8 @@
     "moduleDetection": "force",
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "importsNotUsedAsValues": "remove"
   },
   "include": ["src"]
 }

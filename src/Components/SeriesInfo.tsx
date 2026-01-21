@@ -5,6 +5,7 @@ import { MessageTypes } from "../Controller/AppContextMessages";
 import { hdhrBlueThemeLight } from "../hdhrBlueTheme";
 import { withStyles } from "../withStyles";
 import { DirectoryItemBase, isDirectoryItemEpisode, DirectoryItemSeries } from "../Model/DirectoryItem";
+import { DataPair } from "./DataPair";
 
 export interface SeriesState
 {
@@ -20,11 +21,9 @@ const useStyles = makeStyles(
         innerContainer:
         {
             display: 'flex',
-            flexDirection: 'row',
+            flexDirection: 'column',
             columnGap: '15px',
-            alignItems: 'flex-end',
-
-            background: hdhrBlueThemeLight.colorNeutralBackground3,
+            alignItems: 'flex-start',
         },
         item:
             {}
@@ -54,9 +53,13 @@ export class SeriesWithoutStyles extends React.Component<SeriesProps, SeriesStat
 
     render()
     {
+        const lastRecording = new Date(this.props.item.StartTime * 1000).toLocaleString();
         return (
             <div className={this.props.styles.innerContainer}>
-                Episodes URL: {this.props.item.episodesURL}
+                <DataPair heading="Series Name:" data={this.props.item.Title} /> 
+                <DataPair heading="Last Recording:" data={lastRecording} />
+                <DataPair heading="Series ID:" data={this.props.item.SeriesID} />
+                <DataPair heading="URL" data={this.props.item.EpisodesURL} />
             </div>
         );
     }

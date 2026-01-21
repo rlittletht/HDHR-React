@@ -1,5 +1,6 @@
 
-export interface StaticConfig
+
+export interface IStaticConfig
 {
     version: string,
     globalLogging: boolean,
@@ -9,11 +10,12 @@ export interface StaticConfig
     perfTimers: boolean;
     appLogging: boolean;
     showDebug: boolean;
+    testSources?: Map<string, string>;
 }
 
 const isLocalHost = window.location.host.indexOf('localhost') > -1;
 
-export const s_staticConfig: StaticConfig =
+export const s_staticConfig: IStaticConfig =
 {
     version: "0.0.0.1",
     globalLogging: true && isLocalHost,
@@ -22,5 +24,6 @@ export const s_staticConfig: StaticConfig =
     cdnRoot: isLocalHost ? "https://localhost:3000" : "<<no production - localhost only>>",
     perfTimers: isLocalHost,
     appLogging: true && isLocalHost,
-    showDebug: true && isLocalHost
+    showDebug: true && isLocalHost,
+    testSources: new Map([["Root", "./TestContent/Root.json"]])
 }

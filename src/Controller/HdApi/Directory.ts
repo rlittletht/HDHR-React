@@ -1,8 +1,9 @@
 import { HdApiBase } from "./HdApiBase";
-import { WebApiInterop } from "../WebApiInterop";
+import { WebApiInterop, DefaultRequestConfigOptions } from "../WebApiInterop";
 import { IAppContext } from "../AppContext";
 import { DirectoryItemBase } from "../../Model/DirectoryItem";
 import { MessageTypes } from "../AppContextMessages";
+import { s_staticConfig } from "../../StaticConfig";
 
 export class Directory extends HdApiBase
 {
@@ -15,6 +16,13 @@ export class Directory extends HdApiBase
 	{
         try
         {
+            const test = DefaultRequestConfigOptions;
+
+            if (s_staticConfig.testSources && s_staticConfig.testSources.get("Root"))
+            {
+                return await WebApiInterop.FetchJsonDirect(s_staticConfig.testSources.get("Root")!, {});
+            }
+
             const result = await this.ApiInterop.Fetch<DirectoryItemBase[]>(
                 "recorded_files.json",
                 []);

@@ -10,7 +10,7 @@ export interface IRequestConfigOptions
     AcceptType: string;
 }
 
-const DefaultRequestConfigOptions: IRequestConfigOptions =
+export const DefaultRequestConfigOptions: IRequestConfigOptions =
 {
     IncludeCredentials: true,
     UseCors: true,
@@ -32,7 +32,30 @@ export class WebApiInterop
         this.m_requestOptions = requestOptions;
     }
 
-    get isAuthenticated(): boolean { return this.m_authToken !== ""; }
+    get isAuthenticated(): boolean {return this.m_authToken !== "";}
+
+    static async FetchJsonDirect(sCall: string, request: any): Promise<any>
+    {
+        const result :Response  = await fetch(sCall, request);
+
+        if (result.status >= 400)
+            throw new Error(`FetchDirect failed: (${result.status})`);
+
+        try
+        {
+            return await result.json();
+        }
+        catch (e)
+        {
+            if (e instanceof Error)
+            {
+                if (e.message.indexOf('end of JSON input') > 0)
+                    return null;
+            }
+
+            throw (e);
+        }
+    }
 
     async FetchJson(sApi: string, args: any[]): Promise<any>
     {
@@ -65,25 +88,7 @@ export class WebApiInterop
         //        if (this.m_authToken !== "")
         //            headerVals['Authorization'] = "Bearer " + this.m_authToken;
 
-        let result: Response = await fetch(sCall, request);
-
-        if (result.status >= 400)
-            throw new Error(`FetchJson failed: (${result.status})`);
-
-        try
-        {
-            return await result.json();
-        }
-        catch (e)
-        {
-            if (e instanceof Error)
-            {
-                if (e.message.indexOf('end of JSON input') > 0)
-                    return null;
-            }
-
-            throw (e);
-        }
+        return await WebApiInterop.FetchJsonDirect(sCall, request);
     }
 
     async FetchJsonWithPost(sApi: string, args: any): Promise<any>

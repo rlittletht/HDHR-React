@@ -53,6 +53,16 @@ export function isDirectoryItemEpisode(item: DirectoryItemBase): boolean
     return false;
 }
 
+export function getIdFromDirectoryItem(item: DirectoryItemBase): string
+{
+    if (isDirectoryItemEpisode(item))
+        return (item as DirectoryItemEpisode).CmdURL;
+    else if (isDirectoryItemSeries(item))
+        return (item as DirectoryItemSeries).EpisodesURL;
+
+    throw new Error("unknown item type");
+}
+
 export function getSeries(item: DirectoryItemBase): DirectoryItemSeries | null
 {
     if (isDirectoryItemSeries(item))

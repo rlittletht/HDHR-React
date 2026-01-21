@@ -4,15 +4,15 @@ import { IAppContext, TheAppContext } from "../Controller/AppContext";
 import { MessageTypes } from "../Controller/AppContextMessages";
 import { hdhrBlueThemeLight } from "../hdhrBlueTheme";
 import { withStyles } from "../withStyles";
-import { DirectoryItemBase, isDirectoryItemCommonItems, DirectoryItemCommonItems } from "../Model/DirectoryItem";
 
-export interface CommonItemsState
+export interface DataPairState
 {
 }
 
-export interface CommonItemsProps
+export interface DataPairProps
 {
-    item: DirectoryItemBase;
+    heading: string;
+    data: string;
 }
 
 const useStyles = makeStyles(
@@ -23,25 +23,25 @@ const useStyles = makeStyles(
             flexDirection: 'row',
             columnGap: '15px',
             alignItems: 'flex-end',
-
-            background: hdhrBlueThemeLight.colorNeutralBackground3,
         },
+        heading:
+        {
+            fontWeight: hdhrBlueThemeLight.fontWeightSemibold,
+        },
+        data:
+            {},
         item:
             {}
     });
 
-export class CommonItemsWithoutStyles extends React.Component<CommonItemsProps, CommonItemsState>
+export class DataPairWithoutStyles extends React.Component<DataPairProps, DataPairState>
 {
     context!: IAppContext;
     static contextType = TheAppContext;
 
-    constructor(props: CommonItemsProps)
+    constructor(props: DataPairProps)
     {
         super(props);
-
-        this.state =
-        {
-        }
     }
 
     componentDidMount()
@@ -54,17 +54,13 @@ export class CommonItemsWithoutStyles extends React.Component<CommonItemsProps, 
 
     render()
     {
-        const startTime = new Date(this.props.item.StartTime * 1000).toLocaleString();
-
         return (
             <div className={this.props.styles.innerContainer}>
-                Title: {this.props.item.Title} ({this.props.item.CommonItemsNumber})<br/>
-                <div>Start Time: {startTime}</div>
-                <div>Category: {this.props.item.Category}</div>
-                <div>SeriesID: {this.props.item.SeriesID}</div>
+                <div className={this.props.styles.heading}>{this.props.heading}:</div>
+                <div className={this.props.styles.data}>{this.props.data}</div>
             </div>
         );
     }
 };
 
-export const CommonItems = withStyles(useStyles, CommonItemsWithoutStyles);
+export const DataPair = withStyles(useStyles, DataPairWithoutStyles);
