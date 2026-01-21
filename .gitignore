@@ -1,3 +1,11 @@
+.vscode/
+.vs/
+.idea/
+*.suo
+dist/
+build/
+_Resharper*/
+
 # Logs
 logs
 *.log
