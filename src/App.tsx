@@ -1,6 +1,9 @@
 import React from 'react';
 import './App.css';
 
+import { SessionInfo } from "./Components/Site/SessionInfo";
+import { SiteHeader } from './Components/Site/SiteHeader';
+
 export interface AppProps
 {
 }
@@ -15,7 +18,8 @@ export class App extends React.Component<AppProps, AppState>
   {
     return (
       <div>
-        <h1>HDHR Tools in React!</h1>
+        <SiteHeader/>
+        <SessionInfo/>
       </div>
     );
   }
