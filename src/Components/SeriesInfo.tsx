@@ -56,9 +56,9 @@ export class SeriesWithoutStyles extends React.Component<SeriesProps, SeriesStat
         const lastRecording = new Date(this.props.item.StartTime * 1000).toLocaleString();
         return (
             <div className={this.props.styles.innerContainer}>
-                <DataPair heading="Series Name:" data={this.props.item.Title} /> 
-                <DataPair heading="Last Recording:" data={lastRecording} />
-                <DataPair heading="Series ID:" data={this.props.item.SeriesID} />
+                <DataPair heading="Series Name" data={this.props.item.Title} /> 
+                <DataPair heading="Last Recording" data={lastRecording} />
+                <DataPair heading="Series ID" data={this.props.item.SeriesID} />
                 <DataPair heading="URL" data={this.props.item.EpisodesURL} />
             </div>
         );

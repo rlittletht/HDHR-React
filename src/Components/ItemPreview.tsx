@@ -7,17 +7,21 @@ import { withStyles } from "../withStyles";
 import { DirectoryItemBase, isDirectoryItemEpisode, DirectoryItemEpisode } from "../Model/DirectoryItem";
 import { DataPair } from "./DataPair";
 
-export interface EpisodeState
+export interface ItemPreviewState
 {
 }
 
-export interface EpisodeProps
+export interface ItemPreviewProps
 {
-    item: DirectoryItemEpisode;
+    item: DirectoryItemBase;
 }
 
 const useStyles = makeStyles(
     {
+        thumbnail:
+        {
+            maxHeight: '1in'
+        },
         innerContainer:
         {
             display: 'flex',
@@ -29,12 +33,12 @@ const useStyles = makeStyles(
             {}
     });
 
-export class EpisodeWithoutStyles extends React.Component<EpisodeProps, EpisodeState>
+export class ItemPreviewWithoutStyles extends React.Component<ItemPreviewProps, ItemPreviewState>
 {
     context!: IAppContext;
     static contextType = TheAppContext;
 
-    constructor(props: EpisodeProps)
+    constructor(props: ItemPreviewProps)
     {
         super(props);
 
@@ -53,19 +57,20 @@ export class EpisodeWithoutStyles extends React.Component<EpisodeProps, EpisodeS
 
     render()
     {
-        const recordStart = new Date(this.props.item.RecordStartTime * 1000).toLocaleString();
-        const recordEnd = new Date(this.props.item.RecordEndTime * 1000).toLocaleString();
+        const preview = isDirectoryItemEpisode(this.props.item)
+                            ? (<a href={(this.props.item as DirectoryItemEpisode).PlayURL} download={(this.props.item as DirectoryItemEpisode).Filename}>
+                                   <img className={this.props.styles.thumbnail} src={this.props.item.ImageURL}/>
+                               </a>)
+                            : (<img className={this.props.styles.thumbnail} src={this.props.item.ImageURL}/>);
 
+        const lastRecording = new Date(this.props.item.StartTime * 1000).toLocaleString();
         return (
             <div className={this.props.styles.innerContainer}>
-                <DataPair heading="Title" data={`${this.props.item.EpisodeTitle} (${this.props.item.EpisodeNumber})`}/>
-                <DataPair heading="Record Start" data={recordStart}/>
-                <DataPair heading="Record End" data={recordEnd}/>
-                <DataPair heading="Season" data={this.props.item.EpisodeNumber}/>
-                <DataPair heading="Synopsis" data={this.props.item.Synopsis}/>
+                {preview}
+                {this.props.item.Title}
             </div>
         );
     }
 };
 
-export const Episode = withStyles(useStyles, EpisodeWithoutStyles);
+export const ItemPreview = withStyles(useStyles, ItemPreviewWithoutStyles);

@@ -18,11 +18,10 @@ export interface DirectoryItemSeries extends DirectoryItemBase
 
 export interface DirectoryItemEpisode extends DirectoryItemBase
 {
-    EndTime: 1765747800;
-    OriginalAirdate: 1763769600;
-    RecordEndTime: 1765747830;
-    RecordStartTime: 1765745970;
-    StartTime: 1765746000;
+    EndTime: number;
+    OriginalAirdate: number;
+    RecordEndTime: number;
+    RecordStartTime: number;
     RecordSuccess: 1;
     ChannelImageURL: string;
     ChannelName: string;

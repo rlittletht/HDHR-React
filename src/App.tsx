@@ -60,11 +60,22 @@ export class AppWithoutStyles extends React.Component<AppProps, AppState>
             });
     }
 
+    async openSeries(seriesUrl: string): Promise
+    {
+        this.setState(
+            {
+                items: await this.context.HdApi.Directory.GetSeriesDirectoryListing(seriesUrl)
+            }
+        )
+    }
+
     render()
     {
         //       const items = this.state.items.map(
         //           (item, index) => (
         //               <DirectoryItemLine key={index} item={item}/>));
+
+        const onOpenClicked = this.openSeries.bind(this);
 
         return (
             <div>
@@ -75,7 +86,7 @@ export class AppWithoutStyles extends React.Component<AppProps, AppState>
                 <Button onClick={this.connect.bind(this)}>
                     CONNECT!
                 </Button>
-                <DirectoryItemsContainer items={this.state.items} />
+                <DirectoryItemsContainer items={this.state.items} onOpenClicked={onOpenClicked} />
             </div>);
     }
 }

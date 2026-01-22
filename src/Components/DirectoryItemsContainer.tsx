@@ -1,18 +1,25 @@
 import React from 'react';
 
-import { createTableColumn, makeStyles, TableCellLayout, TableColumnDefinition } from "@fluentui/react-components";
-import { DirectoryItemBase, getIdFromDirectoryItem, DirectoryItemBase as IDirectoryItemBase } from "../Model/DirectoryItem";
+import { Button, createTableColumn, makeStyles, TableCellLayout, TableColumnDefinition } from "@fluentui/react-components";
+import { DirectoryItemBase, getIdFromDirectoryItem, isDirectoryItemEpisode, DirectoryItemEpisode } from "../Model/DirectoryItem";
 import { DirectoryItemDetails } from "./DirectoryItemDetails";
 import { ItemsListWithStyles, ItemsListProps, ItemsListWithoutStyles } from './ItemsList';
 import { withStyles } from '../withStyles';
 import { hdhrBlueThemeLight } from "../hdhrBlueTheme";
+import { OpenFilled } from '@fluentui/react-icons';
+import { TheAppContext, IAppContext } from '../Controller/AppContext';
+import { MessageTypes } from '../Controller/AppContextMessages';
+import { ItemPreview } from './ItemPreview';
+
+export type OpenCallback = (seriesUrl: string) => void;
 
 export interface DirectoryItemsContainerProps
 {
     styles: Record<string, string>;
     //    title?: string;
     //    children: React.ReactNode;
-    items: DirectoryItemBase[]
+    items: DirectoryItemBase[];
+    onOpenClicked: OpenCallback;
 }
 
 export interface DirectoryItemsContainerState
@@ -25,7 +32,7 @@ export interface DirectoryItemArgs
 }
 
 export const DirectoryItemsList: React.ComponentType<ItemsListProps<DirectoryItemBase, DirectoryItemArgs>> =
-    ItemsListWithStyles<DirectoryItemBase, DirectoryItemArgs>(ItemsListWithoutStyles < IDirectoryItemBase, DirectoryItemArgs > );
+    ItemsListWithStyles<DirectoryItemBase, DirectoryItemArgs>(ItemsListWithoutStyles < DirectoryItemBase, DirectoryItemArgs > );
 
 const useStyles = makeStyles(
     {
@@ -45,9 +52,22 @@ const useStyles = makeStyles(
 
 class DirectoryItemsContainerWithoutStyles extends React.Component<DirectoryItemsContainerProps, DirectoryItemsContainerState>
 {
+    context!: IAppContext;
+    static contextType = TheAppContext;
+
     constructor(props: DirectoryItemsContainerProps)
     {
         super(props);
+    }
+
+    async onOpenButtonClick(event: React.MouseEvent<HTMLButtonElement>, item: DirectoryItemBase, onlyEditId?: string)
+    {
+        event.stopPropagation();
+
+        if (isDirectoryItemEpisode(item))
+            return;
+
+        this.props.onOpenClicked(item.SeriesID);
     }
 
     getTableColumnDefinitionsForDirectoryItemlist(onlyEditId?: string)
@@ -66,7 +86,7 @@ class DirectoryItemsContainerWithoutStyles extends React.Component<DirectoryItem
                     {
                         return (
                             <TableCellLayout>
-                                <img className={this.props.styles.thumbnail} src={item.ImageURL}/><br/> {item.Title}
+                                <ItemPreview item={item}/>
                             </TableCellLayout>);
                     }
                 }),
@@ -97,22 +117,23 @@ class DirectoryItemsContainerWithoutStyles extends React.Component<DirectoryItem
                         return (
                             <TableCellLayout>
                                 <div className={this.props.styles.outerContainer}>
-                                    <DirectoryItemDetails item={item} />
+                                    <DirectoryItemDetails item={item}/>
                                 </div>
                             </TableCellLayout>);
                     }
-                })
-            //                ,
-            //            createTableColumn<DirectoryItemBase>(
-            //                {
-            //                    columnId: "actions",
-            //                    renderHeaderCell: () => { return "Actions"; },
-            //                    renderCell: (item: DirectoryItemBase) =>
-            //                    {
-            //                        return (
-            //                            <Button aria-label="Edit" icon={<EditRegular/>} onClick={(event) => this.onEditButtonClick(event, item)}/>);
-            //                    }
-            //                }),
+                }),
+            createTableColumn<DirectoryItemBase>(
+                {
+                    columnId: "actions",
+                    renderHeaderCell: () => { return "Actions"; },
+                    renderCell: (item: DirectoryItemBase) =>
+                    {
+                        return isDirectoryItemEpisode(item)
+                                   ? (<span/>)
+                                   : (
+                                       <Button aria-label="Open" icon={<OpenFilled/>} onClick={(event) => this.onOpenButtonClick(event, item)}/>);
+                    }
+                }),
         ];
 
         return columns;
