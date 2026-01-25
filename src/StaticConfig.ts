@@ -25,5 +25,6 @@ export const s_staticConfig: IStaticConfig =
     perfTimers: isLocalHost,
     appLogging: true && isLocalHost,
     showDebug: true && isLocalHost,
-    testSources: new Map([["Root", "./TestContent/Root.json"], ["C329265ENHFRI", "./TestContent/C329265ENHFRI.json"]])
+    testSources: new Map()
+    //    testSources: new Map([["Root", "./TestContent/Root.json"], ["C329265ENHFRI", "./TestContent/C329265ENHFRI.json"]])
 }

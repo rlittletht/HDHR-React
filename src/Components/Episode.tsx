@@ -62,7 +62,8 @@ export class EpisodeWithoutStyles extends React.Component<EpisodeProps, EpisodeS
                 <DataPair heading="Record Start" data={recordStart}/>
                 <DataPair heading="Record End" data={recordEnd}/>
                 <DataPair heading="Season" data={this.props.item.EpisodeNumber}/>
-                <DataPair heading="Synopsis" data={this.props.item.Synopsis}/>
+                <DataPair heading="Synopsis" data={this.props.item.Synopsis} />
+                <DataPair heading="ID" data={this.props.item.Id} />
             </div>
         );
     }

@@ -22,7 +22,7 @@ const useStyles = makeStyles(
             display: 'flex',
             flexDirection: 'row',
             columnGap: '15px',
-            alignItems: 'flex-end',
+            alignItems: 'flex-start',
         },
         heading:
         {

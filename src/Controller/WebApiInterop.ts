@@ -32,11 +32,11 @@ export class WebApiInterop
         this.m_requestOptions = requestOptions;
     }
 
-    get isAuthenticated(): boolean {return this.m_authToken !== "";}
+    get isAuthenticated(): boolean { return this.m_authToken !== ""; }
 
     static async FetchJsonDirect(sCall: string, request: any): Promise<any>
     {
-        const result :Response  = await fetch(sCall, request);
+        const result: Response = await fetch(sCall, request);
 
         if (result.status >= 400)
             throw new Error(`FetchDirect failed: (${result.status})`);
@@ -97,22 +97,26 @@ export class WebApiInterop
 
         const headerVals: any =
         {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json' // ,
+            'Accept': this.m_requestOptions.AcceptType
         };
 
-        //        if (this.m_authToken !== "")
-        //            headerVals['Authorization'] = "Bearer " + this.m_authToken;
+        if (this.m_requestOptions.IncludeRequestContentType)
+            headerVals['Content-Type'] = 'application/json';
 
-        let result: Response = await fetch(
-            sCall,
-            {
-                method: 'POST',
-                mode: 'cors',
-                credentials: 'include',
-                headers: headerVals,
-                body: JSON.stringify(args)
-            });
+        const request: any = { headers: headerVals };
+
+        if (this.m_requestOptions.UseCors)
+            request.mode = 'cors';
+
+        if (this.m_requestOptions.IncludeCredentials)
+            request.credentials = 'include';
+
+        request.method = 'POST';
+
+        if (args)
+            request.body = JSON.stringify(args);
+
+        let result: Response = await fetch(sCall, request);
 
         if (result.status >= 400)
             throw new Error(`FetchJson failed: (${result.status})`);

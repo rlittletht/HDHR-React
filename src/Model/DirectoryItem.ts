@@ -1,4 +1,3 @@
-
 export declare type DirectoryItemCategory = "series";
 
 export interface DirectoryItemBase
@@ -32,8 +31,13 @@ export interface DirectoryItemEpisode extends DirectoryItemBase
     Synopsis: string;
     Title: string;
     Filename: string;
-    PlayURL: string;
-    CmdURL: string;
+    Id: string;
+}
+
+export function extractIdFromUrl(url: string): string
+{
+    const urlObj = new URL(url);
+    return urlObj.searchParams.get("id");
 }
 
 export function isDirectoryItemSeries(item: DirectoryItemBase): boolean
@@ -52,10 +56,22 @@ export function isDirectoryItemEpisode(item: DirectoryItemBase): boolean
     return false;
 }
 
+export function getSeriesEpisodeFromItem(item: DirectoryItemBase): string
+{
+    if (isDirectoryItemEpisode(item))
+    {
+        const episodeNumber = (item as DirectoryItemEpisode).EpisodeNumber;
+
+        return episodeNumber || "";
+    }
+
+    return item.SeriesID;
+}
+
 export function getIdFromDirectoryItem(item: DirectoryItemBase): string
 {
     if (isDirectoryItemEpisode(item))
-        return (item as DirectoryItemEpisode).CmdURL;
+        return (item as DirectoryItemEpisode).Id;
     else if (isDirectoryItemSeries(item))
         return (item as DirectoryItemSeries).EpisodesURL;
 
@@ -75,4 +91,3 @@ export function getEpisode(item: DirectoryItemBase): DirectoryItemEpisode | null
         return item as DirectoryItemEpisode;
     return null;
 }
-
