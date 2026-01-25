@@ -12,6 +12,7 @@ import { hdhrBlueThemeLight } from "../../hdhrBlueTheme";
 export interface SessionInfoProps
 {
     styles: Record<string, string>;
+    Device?: string;
 }
 
 export interface SessionInfoState
@@ -46,6 +47,8 @@ class SessionInfoWithoutStyles extends React.Component<SessionInfoProps, Session
 {
     render()
     {
+        const connected = this.props.Device ? `Connected to ${this.props.Device}` : "Not connected";
+
         return (
             <div className={this.props.styles.outerContainer}>
                 <div className={this.props.styles.innerContainer}>
@@ -54,7 +57,7 @@ class SessionInfoWithoutStyles extends React.Component<SessionInfoProps, Session
                     </Text>
                 </div>
                 <div className={this.props.styles.innerContainer}>
-                    TEST
+                    {connected}
                 </div>
             </div>
         );

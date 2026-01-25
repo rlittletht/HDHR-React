@@ -55,6 +55,7 @@ export interface ItemsListProps<TItem, TEditArgs>
 
     onSelectionChange?: OnSelectionChangeDelegate;
     selectedItems?: Set<TableRowId>;
+    notCheckable?: boolean;
 }
 
 export interface ItemsListState
@@ -104,9 +105,14 @@ export class ItemsListWithoutStyles<TItem, TEditArgs> extends React.Component<It
     {
         const items = this.props.items;
 
+        const selectionCell = this.props.notCheckable ? undefined : {checkboxIndicator: {"aria-label": "Select row"}};
+        const selectionHeaderCell = this.props.notCheckable ? undefined : {checkboxIndicator: {"aria-label": "Select all rows"}};
+        const selectionMode = this.props.notCheckable ? undefined : "multiselect";
+        const subtleSelection = this.props.notCheckable ? undefined : true;
+
         const gridBody = (<DataGridBody<TItem>>
                               {({ item, rowId }) => (
-                                  <DataGridRow<TItem> key={rowId} selectionCell={{ checkboxIndicator: { "aria-label": "Select row" } }}>
+                                  <DataGridRow<TItem> key={rowId} selectionCell={selectionCell}>
                                       {({ renderCell }) => (
                         <DataGridCell>{renderCell(item)}</DataGridCell>)}
                                   </DataGridRow>)}
@@ -118,14 +124,14 @@ export class ItemsListWithoutStyles<TItem, TEditArgs> extends React.Component<It
 
         return (
             <div>
-                <DataGrid className={this.props.styles?.gridTable} items={items} columns={this.props.columns} sortable selectionMode="multiselect" subtleSelection
+                <DataGrid className={this.props.styles?.gridTable} items={items} columns={this.props.columns} sortable selectionMode={selectionMode} subtleSelection={subtleSelection}
                     getRowId={this.props.getRowId}
                     noNativeElements={this.props.fixedColumns ? true : false}
                     selectedItems={selectedItems}
                     onSelectionChange={(e, selectedItems) => onSelectionChanged(selectedItems.selectedItems)}
                     style={{ tableLayout: 'auto' }}>
                     <DataGridHeader className={this.props.styles?.headerRow}>
-                        <DataGridRow selectionCell={{ checkboxIndicator: { "aria-label": "Select all rows" } }}>
+                        <DataGridRow selectionCell={selectionHeaderCell}>
                             {({ renderHeaderCell }) => (<DataGridHeaderCell className={this.props.styles?.headerCellProps}>{renderHeaderCell()}</DataGridHeaderCell>)}
                         </DataGridRow>
                     </DataGridHeader>

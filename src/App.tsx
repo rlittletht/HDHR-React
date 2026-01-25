@@ -7,7 +7,7 @@ import { TestButton } from './Components/TestButton';
 import { StatusBoxToast } from "./Components/Site/StatusBoxToast";
 import { Button, makeStyles } from '@fluentui/react-components';
 import { IAppContext, TheAppContext } from "./Controller/AppContext";
-import { DirectoryItemBase, isDirectoryItemSeries, getIdFromDirectoryItem, DirectoryItemEpisode } from "./Model/DirectoryItem";
+import { DirectoryItemBase, isDirectoryItemSeries, getIdFromDirectoryItem, DirectoryItemEpisode, isDirectoryItemEpisode, itemsContainEpisodes } from "./Model/DirectoryItem";
 import { DirectoryItemLine } from './Components/DirectoryItemLine';
 import { Secrets } from './Secrets';
 import { ItemsListWithStyles, ItemsListWithoutStyles, ItemsListProps } from "./Components/ItemsList";
@@ -36,10 +36,21 @@ export interface AppState
     itemsDeleting?: DirectoryItemEpisode[],
     deleteConfirmationDetails?: string[],
     isConfirmingDelete?: boolean,
+    device?: string,
 }
 
 const useStyles = makeStyles(
     {
+        buttons:
+        {
+            display: 'flex',
+            flexDirection: 'row',
+            columnGap: '15px',
+            background: hdhrBlueThemeLight.colorNeutralBackground3,
+            justifyContent: 'flex-start',
+            height: '2.5em',
+            alignItems: 'center'
+        }
     });
 
 export class AppWithoutStyles extends React.Component<AppProps, AppState>
@@ -60,11 +71,13 @@ export class AppWithoutStyles extends React.Component<AppProps, AppState>
 
     async connect()
     {
-        this.context.Connect(`http://hdhr-${Secrets.DeviceID}.local`);
+        const device = `http://hdhr-${Secrets.DeviceID}.local`;
+        this.context.Connect(device);
 
         this.setState(
             {
-                items: await this.context.HdApi.Directory.GetRootDirectoryListing()
+                items: await this.context.HdApi.Directory.GetRootDirectoryListing(),
+                device: device
             });
     }
 
@@ -181,6 +194,16 @@ export class AppWithoutStyles extends React.Component<AppProps, AppState>
         this.setState({ selectedItems: selectedItems });
     }
 
+    itemsContainEpisodes(): boolean
+    {
+        for (const item of this.state.items)
+        {
+            if (isDirectoryItemEpisode(item))
+                return true;
+        }
+        return false;
+    }
+
     render()
     {
         //       const items = this.state.items.map(
@@ -196,6 +219,8 @@ export class AppWithoutStyles extends React.Component<AppProps, AppState>
 
         const deleteDetails = this.state.deleteConfirmationDetails.map((_item, _idx) => (<li key={_idx}>{_item}</li>));
 
+        const connectOrRead = this.state.device ? "Read Root" : "Connect";
+
         const confirmDeleteDialog = (
             <ModalPrompt title={confirmTitle} confirm="Delete" onDismiss={onDismiss} onSave={onDeleteConfirmed} open={this.isConfirmingDelete()} visible={false}>
                 <div>
@@ -205,22 +230,26 @@ export class AppWithoutStyles extends React.Component<AppProps, AppState>
                 </div>
             </ModalPrompt>);
 
+        const deleteButton = (<Button onClick={this.deleteAllSelected.bind(this)}>
+                                  Delete Selected Episodes
+                              </Button>);
 
         return (
             <div>
                 {this.isConfirmingDelete() && confirmDeleteDialog}
                 <SiteHeader/>
-                <SessionInfo/>
+                <SessionInfo Device={this.state.device}/>
                 <StatusBoxToast/>
-                <Button onClick={this.connect.bind(this)}>
-                    Read Root
-                </Button>
-                <Button onClick={this.deleteAllSelected.bind(this)}>Delete Selected Episodes</Button>
+                <div className={this.props.styles.buttons}>
+                    <Button onClick={this.connect.bind(this)}>
+                        {connectOrRead}
+                    </Button>
+                    {itemsContainEpisodes(this.state.items) && deleteButton}
+                </div>
 
                 <DirectoryItemsContainer items={this.state.items} onOpenClicked={onOpenClicked} onDeleteClicked={onDeleteClicked}
                                          onSelectionChange={this.onSelectionChange.bind(this)}
-                                         selectedItems={this.state.selectedItems}
-                />
+                                         selectedItems={this.state.selectedItems}/>
             </div>);
     }
 }

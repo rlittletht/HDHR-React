@@ -9,58 +9,57 @@ import { withStyles } from '../../withStyles';
 
 interface SiteHeaderProps
 {
-  styles: Record<string, string>;
+    styles: Record<string, string>;
 }
 
 
 const useStyles = makeStyles(
-  {
-    outerContainer:
     {
-      display: 'flex',
-      flexDirection: 'row',
-      columnGap: '15px',
-      alignItems: 'flex-end',
-      background: hdhrBlueThemeLight.colorBrandBackground2,
-      justifyContent: 'space-between'
-    },
-    item:
-      {}
-  });
+        outerContainer:
+        {
+            display: 'flex',
+            flexDirection: 'row',
+            columnGap: '15px',
+            background: hdhrBlueThemeLight.colorBrandBackground2,
+            justifyContent: 'space-between',
+            height: '2.5em',
+            alignItems: 'center'
+        },
+        siteHeader:
+        {
+            fontSize: hdhrBlueThemeLight.fontSizeHero700,
+        },
+        item:
+            {}
+    });
 
 class SiteHeaderWithoutStyles extends React.Component<SiteHeaderProps>
 {
-  render()
-  {
-    const headerStyles: CSS.Properties =
+    render()
     {
-      background: hdhrBlueThemeLight.colorBrandBackground2,
-      textAlign: 'center'
-    };
+        const headerStyles: CSS.Properties =
+        {
+            background: hdhrBlueThemeLight.colorBrandBackground2,
+            textAlign: 'center',
+        };
 
-    const productRef: CSS.Properties =
-    {
-      color: hdhrBlueThemeLight.colorBrandForeground1,
-      fontSize: '90%',
-      fontVariant: 'small-caps'
-    };
+        const leftLogo = "";
+        const rightLogo = "";
 
-    return (
-      <div className="SiteHeader" style={headerStyles}>
-        <div className={this.props.styles.outerContainer}>
-          <div>
-            LEFT LOGO HERE
-          </div>
-          <div>
-            <b>hdhr-react</b>
-          </div>
-          <div>
-            RIGHT LOGO HERE
-          </div>
-        </div>
-      </div>
-    );
-  }
+        return (
+            <div className={this.props.styles.outerContainer}>
+                <div>
+                    {leftLogo}
+                </div>
+                <div className={this.props.styles.siteHeader}>
+                    <b>hdhr-tools</b>
+                </div>
+                <div>
+                    {rightLogo}
+                </div>
+            </div>
+        );
+    }
 }
 
 export const SiteHeader = withStyles(useStyles, SiteHeaderWithoutStyles);

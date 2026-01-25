@@ -91,3 +91,14 @@ export function getEpisode(item: DirectoryItemBase): DirectoryItemEpisode | null
         return item as DirectoryItemEpisode;
     return null;
 }
+
+
+export function itemsContainEpisodes(items: DirectoryItemBase[]): boolean
+{
+    for (const item of items)
+    {
+        if (isDirectoryItemEpisode(item))
+            return true;
+    }
+    return false;
+}

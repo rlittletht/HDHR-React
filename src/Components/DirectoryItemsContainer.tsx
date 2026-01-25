@@ -1,7 +1,7 @@
 import React from 'react';
 
 import {Button, createTableColumn, makeStyles, TableCellLayout, TableColumnDefinition, TableRowId} from "@fluentui/react-components";
-import {DirectoryItemBase, getIdFromDirectoryItem, isDirectoryItemEpisode, DirectoryItemEpisode, getSeriesEpisodeFromItem} from "../Model/DirectoryItem";
+import {DirectoryItemBase, getIdFromDirectoryItem, isDirectoryItemEpisode, DirectoryItemEpisode, getSeriesEpisodeFromItem, itemsContainEpisodes} from "../Model/DirectoryItem";
 import { DirectoryItemDetails } from "./DirectoryItemDetails";
 import { ItemsListWithStyles, ItemsListProps, ItemsListWithoutStyles, OnSelectionChangeDelegate } from './ItemsList';
 import { withStyles } from '../withStyles';
@@ -162,8 +162,10 @@ class DirectoryItemsContainerWithoutStyles extends React.Component<DirectoryItem
         const getRowId = (item: DirectoryItemBase) => getIdFromDirectoryItem(item);
         const columns = this.getTableColumnDefinitionsForDirectoryItemlist();
 
+        const notCheckable = !itemsContainEpisodes(this.props.items);
+            
         return (<div>
-                    <DirectoryItemsList getRowId={getRowId} items={this.props.items} columns={columns} onSelectionChange={this.props.onSelectionChange} selectedItems={this.props.selectedItems}/>
+            <DirectoryItemsList notCheckable={notCheckable} getRowId={getRowId} items={this.props.items} columns={columns} onSelectionChange={this.props.onSelectionChange} selectedItems={this.props.selectedItems}/>
                 </div>);
     }
 }
