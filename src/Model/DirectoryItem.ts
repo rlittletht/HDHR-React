@@ -102,3 +102,26 @@ export function itemsContainEpisodes(items: DirectoryItemBase[]): boolean
     }
     return false;
 }
+
+export function getCmdApiForEpisodeId(episode: string, cmd: string): string
+{
+    return `recorded/cmd?id=${episode}&cmd=${cmd}`;
+}
+
+export function getPlayApiForEpisodeId(episode: string): string
+{
+    return `recorded/play?id=${episode}`;
+}
+
+export async function copyPathToClipboard(episode: DirectoryItemEpisode): Promise<void>
+{
+    try
+    {
+        await navigator.clipboard.writeText(episode.Filename);
+    }
+    catch (error)
+    {
+        console.error("Failed to copy path to clipboard:", error);
+        throw error;
+    }
+}

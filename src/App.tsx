@@ -5,9 +5,9 @@ import { SessionInfo } from "./Components/Site/SessionInfo";
 import { SiteHeader } from './Components/Site/SiteHeader';
 import { TestButton } from './Components/TestButton';
 import { StatusBoxToast } from "./Components/Site/StatusBoxToast";
-import { Button, makeStyles } from '@fluentui/react-components';
+import { Button, Checkbox, makeStyles } from '@fluentui/react-components';
 import { IAppContext, TheAppContext } from "./Controller/AppContext";
-import { DirectoryItemBase, isDirectoryItemSeries, getIdFromDirectoryItem, DirectoryItemEpisode, isDirectoryItemEpisode, itemsContainEpisodes } from "./Model/DirectoryItem";
+import { DirectoryItemBase, isDirectoryItemSeries, getIdFromDirectoryItem, DirectoryItemEpisode, isDirectoryItemEpisode, itemsContainEpisodes, getPlayUrlForEpisodeId, copyPathToClipboard } from "./Model/DirectoryItem";
 import { DirectoryItemLine } from './Components/DirectoryItemLine';
 import { Secrets } from './Secrets';
 import { ItemsListWithStyles, ItemsListWithoutStyles, ItemsListProps } from "./Components/ItemsList";
@@ -37,6 +37,7 @@ export interface AppState
     deleteConfirmationDetails?: string[],
     isConfirmingDelete?: boolean,
     device?: string,
+    rerecordDeletedItems: boolean,
 }
 
 const useStyles = makeStyles(
@@ -126,7 +127,7 @@ export class AppWithoutStyles extends React.Component<AppProps, AppState>
 
     async doDeleteEpisodeNoConfirm(id: string)
     {
-        await this.context.HdApi.Commands.DeleteItem(id);
+        await this.context.HdApi.Commands.DeleteItem(id, this.state.rerecordDeletedItems ? 1 : 0);
 
         const newItems = this.state.items.filter((item) => item.Id !== id);
         this.setState(
@@ -204,6 +205,21 @@ export class AppWithoutStyles extends React.Component<AppProps, AppState>
         return false;
     }
 
+    async doDownloadEpisode(episode: DirectoryItemEpisode): Promise<void>
+    {
+        const name = episode.Filename;
+
+        copyPathToClipboard(episode);
+
+        this.context.Messages.message("Download Episode",
+            [`Downloading ${episode.Title} (${episode.EpisodeNumber})`,
+            `Copied episode name '${name}' to clipboard`],
+            MessageTypes.Toast,
+            4000);
+
+        await this.context.HdApi.Commands.OpenWindowForEpisode(episode.Id);
+    }
+
     render()
     {
         //       const items = this.state.items.map(
@@ -213,6 +229,7 @@ export class AppWithoutStyles extends React.Component<AppProps, AppState>
         const onOpenClicked = this.openSeries.bind(this);
         const onDeleteClicked = this.deleteEpisode.bind(this);
         const onDismiss = this.onDismiss.bind(this);
+        const onDownloadClicked = this.doDownloadEpisode.bind(this);
 
         const confirmTitle = this.state.isConfirmingDelete ? "Completely delete user?" : "Delete user from group?";
         const onDeleteConfirmed = this.onDeleteConfirmed.bind(this);
@@ -227,6 +244,8 @@ export class AppWithoutStyles extends React.Component<AppProps, AppState>
                     Deleting these user(s) will also delete the following:
                     <ul>{deleteDetails}</ul>
                     Are you sure you want to delete {this.state.itemsDeleting?.length ?? 0} episodes?
+                    <br />
+                    <Checkbox label="Rerecord deleted episodes" checked={this.state.rerecordDeletedItems} onChange={(_e, data) => this.setState({rerecordDeletedItems: !!data.checked})} />
                 </div>
             </ModalPrompt>);
 
@@ -247,7 +266,7 @@ export class AppWithoutStyles extends React.Component<AppProps, AppState>
                     {itemsContainEpisodes(this.state.items) && deleteButton}
                 </div>
 
-                <DirectoryItemsContainer items={this.state.items} onOpenClicked={onOpenClicked} onDeleteClicked={onDeleteClicked}
+                <DirectoryItemsContainer items={this.state.items} onOpenClicked={onOpenClicked} onDeleteClicked={onDeleteClicked} onDownloadClicked={onDownloadClicked}
                                          onSelectionChange={this.onSelectionChange.bind(this)}
                                          selectedItems={this.state.selectedItems}/>
             </div>);
