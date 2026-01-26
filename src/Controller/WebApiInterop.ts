@@ -190,4 +190,11 @@ export class WebApiInterop
 
         return { [key]: value };
     }
+
+    async OpenWindow(sApi: string): Promise<void>
+    {
+        const url = this.m_sApiRoot.concat("/", sApi);
+
+        window.open(url, '_blank');
+    }
 }

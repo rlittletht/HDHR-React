@@ -9,7 +9,7 @@ To build:
 * Clone the repository
 * Copy src/Secrets-Sample.ts to src/Secrets.ts and fill in your HDHomeRun storage device id
 * Run `npm install` to install dependencies
-* Run 'npm start' to start the development server
+* Run `npm start` to start the development server
 
 
 You can get your device from the devices page in the HDHomeRun app, or you can hope that

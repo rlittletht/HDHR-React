@@ -1,18 +1,21 @@
 import React from 'react';
 
-import {Button, createTableColumn, makeStyles, TableCellLayout, TableColumnDefinition, TableRowId} from "@fluentui/react-components";
-import {DirectoryItemBase, getIdFromDirectoryItem, isDirectoryItemEpisode, DirectoryItemEpisode, getSeriesEpisodeFromItem, itemsContainEpisodes} from "../Model/DirectoryItem";
+import { Button, createTableColumn, makeStyles, TableCellLayout, TableColumnDefinition, TableRowId } from "@fluentui/react-components";
+import { DirectoryItemBase, getIdFromDirectoryItem, isDirectoryItemEpisode, DirectoryItemEpisode, getSeriesEpisodeFromItem, itemsContainEpisodes, DirectoryItemBase as IDirectoryItemBase } from
+    "../Model/DirectoryItem";
 import { DirectoryItemDetails } from "./DirectoryItemDetails";
 import { ItemsListWithStyles, ItemsListProps, ItemsListWithoutStyles, OnSelectionChangeDelegate } from './ItemsList';
 import { withStyles } from '../withStyles';
 import { hdhrBlueThemeLight } from "../hdhrBlueTheme";
-import { OpenFilled, DeleteFilled } from '@fluentui/react-icons';
+import { OpenFilled, DeleteFilled, ArrowDownloadFilled } from '@fluentui/react-icons';
 import { TheAppContext, IAppContext } from '../Controller/AppContext';
 import { MessageTypes } from '../Controller/AppContextMessages';
 import { ItemPreview } from './ItemPreview';
+import { ItemSource } from "./ItemSource";
 
 export type OpenCallback = (seriesUrl: string) => void;
 export type DeleteCallback = (seriesUrl: string) => void;
+export type DownloadCallback = (item: DirectoryItemEpisode) => void;
 
 export interface DirectoryItemsContainerProps
 {
@@ -21,7 +24,8 @@ export interface DirectoryItemsContainerProps
     //    children: React.ReactNode;
     items: DirectoryItemBase[];
     onOpenClicked: OpenCallback;
-    onDeleteButtonClick: DeleteCallback;
+    onDeleteClicked: DeleteCallback;
+    onDownloadClicked: DownloadCallback;
     onSelectionChange: OnSelectionChangeDelegate;
     selectedItems: Set<TableRowId>;
 }
@@ -36,7 +40,7 @@ export interface DirectoryItemArgs
 }
 
 export const DirectoryItemsList: React.ComponentType<ItemsListProps<DirectoryItemBase, DirectoryItemArgs>> =
-    ItemsListWithStyles<DirectoryItemBase, DirectoryItemArgs>(ItemsListWithoutStyles < DirectoryItemBase, DirectoryItemArgs > );
+    ItemsListWithStyles<DirectoryItemBase, DirectoryItemArgs>(ItemsListWithoutStyles < IDirectoryItemBase, DirectoryItemArgs > );
 
 const useStyles = makeStyles(
     {
@@ -52,6 +56,15 @@ const useStyles = makeStyles(
             alignItems: 'flex-end',
             justifyContent: 'space-between'
         },
+        buttons:
+        {
+            display: 'flex',
+            flexDirection: 'row',
+            columnGap: '15px',
+            justifyContent: 'flex-start',
+            height: '2.5em',
+            alignItems: 'center'
+        }
     });
 
 class DirectoryItemsContainerWithoutStyles extends React.Component<DirectoryItemsContainerProps, DirectoryItemsContainerState>
@@ -86,10 +99,47 @@ class DirectoryItemsContainerWithoutStyles extends React.Component<DirectoryItem
         this.props.onDeleteClicked(episode.Id);
     }
 
-    getTableColumnDefinitionsForDirectoryItemlist(onlyEditId?: string)
+    async onDownloadButtonClick(event: React.MouseEvent<HTMLButtonElement>, item: DirectoryItemBase, onlyEditId?: string)
     {
-        const columns: TableColumnDefinition<DirectoryItemBase>[] =
-        [
+        event.stopPropagation();
+
+        if (!isDirectoryItemEpisode(item))
+            return;
+
+        const episode = item as DirectoryItemEpisode;
+        if (this.props.onDownloadClicked)
+            await this.props.onDownloadClicked(episode);
+    }
+
+    getActionButtons(item: DirectoryItemBase)
+    {
+        const downloadButton = (
+            <Button aria-label="Download" icon={<ArrowDownloadFilled/>} onClick={(event) =>
+                this.onDownloadButtonClick(event, item)}/>);
+
+        const deleteButton = (
+            <Button aria-label="Open" icon={<DeleteFilled/>} onClick={(event) =>
+                this.onDeleteButtonClick(event, item)}/>);
+
+        const openButton = (
+            <Button aria-label="Open" icon={<OpenFilled/>} onClick={(event) =>
+                this.onOpenButtonClick(event, item)}/>);
+
+        const isEpisode = isDirectoryItemEpisode(item);
+
+        return (
+            <div className={this.props.styles.buttons}>
+                {!isEpisode && openButton}
+                {isEpisode && downloadButton}
+                {isEpisode && deleteButton}
+            </div>);
+    }
+
+    getTableColumnDefinitionsForDirectoryItemlist(items: DirectoryItemBase[], onlyEditId?: string)
+    {
+        const columns: TableColumnDefinition<DirectoryItemBase>[] = [];
+        const seriesEpisodeHeader = itemsContainEpisodes(items) ? "Episode" : "Series";
+        columns.push(
             createTableColumn<DirectoryItemBase>(
                 {
                     columnId: "title",
@@ -105,7 +155,33 @@ class DirectoryItemsContainerWithoutStyles extends React.Component<DirectoryItem
                                 <ItemPreview item={item}/>
                             </TableCellLayout>);
                     }
-                }),
+                }));
+
+        if (itemsContainEpisodes(items))
+        {
+            columns.push(
+                createTableColumn<DirectoryItemBase>(
+                    {
+                        columnId: "source",
+                        compare: (left: DirectoryItemBase, right: DirectoryItemBase) =>
+                        {
+                            const leftSource = isDirectoryItemEpisode(left) ? (left as DirectoryItemEpisode).ChannelName : "N/A";
+                            const rightSource = isDirectoryItemEpisode(right) ? (right as DirectoryItemEpisode).ChannelName : "N/A";
+
+                            return leftSource.localeCompare(rightSource);
+                        },
+                        renderHeaderCell: () => { return "Source"; },
+                        renderCell: (item: DirectoryItemBase) =>
+                        {
+                            return (
+                                <TableCellLayout>
+                                    <ItemSource item={item}/>
+                                </TableCellLayout>);
+                        }
+                    }));
+        }
+
+        columns.push(
             createTableColumn<DirectoryItemBase>(
                 {
                     columnId: "series-episode",
@@ -115,13 +191,15 @@ class DirectoryItemsContainerWithoutStyles extends React.Component<DirectoryItem
                         const rightS: string = getSeriesEpisodeFromItem(right);
                         return leftS.localeCompare(rightS);
                     },
-                    renderHeaderCell: () => { return "SeriesID"; },
+                    renderHeaderCell: () => {return seriesEpisodeHeader;},
                     renderCell: (item: DirectoryItemBase) =>
                     {
                         return (
                             <TableCellLayout>{getSeriesEpisodeFromItem(item)}</TableCellLayout>);
                     }
-                }),
+                }));
+
+        columns.push(
             createTableColumn<DirectoryItemBase>(
                 {
                     columnId: "details",
@@ -129,30 +207,27 @@ class DirectoryItemsContainerWithoutStyles extends React.Component<DirectoryItem
                     {
                         return left.Title.localeCompare(right.Title);
                     },
-                    renderHeaderCell: () => { return "Details"; },
+                    renderHeaderCell: () => {return "Details";},
                     renderCell: (item: DirectoryItemBase) =>
                     {
                         return (
                             <TableCellLayout>
                                 <div className={this.props.styles.outerContainer}>
-                                    <DirectoryItemDetails item={item}/>
+                                    <DirectoryItemDetails item={item} />
                                 </div>
                             </TableCellLayout>);
                     }
-                }),
+                }));
+        columns.push(
             createTableColumn<DirectoryItemBase>(
                 {
                     columnId: "actions",
-                    renderHeaderCell: () => { return "Actions"; },
+                    renderHeaderCell: () => {return "Actions";},
                     renderCell: (item: DirectoryItemBase) =>
                     {
-                        return isDirectoryItemEpisode(item)
-                                   ? (<Button aria-label="Open" icon={<DeleteFilled/>} onClick={(event) => this.onDeleteButtonClick(event, item)}/>)
-                                   : (
-                                       <Button aria-label="Open" icon={<OpenFilled/>} onClick={(event) => this.onOpenButtonClick(event, item)}/>);
+                        return this.getActionButtons(item);
                     }
-                }),
-        ];
+                }));
 
         return columns;
     }
@@ -160,12 +235,13 @@ class DirectoryItemsContainerWithoutStyles extends React.Component<DirectoryItem
     render()
     {
         const getRowId = (item: DirectoryItemBase) => getIdFromDirectoryItem(item);
-        const columns = this.getTableColumnDefinitionsForDirectoryItemlist();
+        const columns = this.getTableColumnDefinitionsForDirectoryItemlist(this.props.items);
 
         const notCheckable = !itemsContainEpisodes(this.props.items);
-            
+
         return (<div>
-            <DirectoryItemsList notCheckable={notCheckable} getRowId={getRowId} items={this.props.items} columns={columns} onSelectionChange={this.props.onSelectionChange} selectedItems={this.props.selectedItems}/>
+                    <DirectoryItemsList notCheckable={notCheckable} getRowId={getRowId} items={this.props.items} columns={columns} onSelectionChange={this.props.onSelectionChange} selectedItems={this.props
+.selectedItems}/>
                 </div>);
     }
 }
